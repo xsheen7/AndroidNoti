@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.word.block.puzzle.free.relax.helper">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application>
+        <receiver
+            android:name=".notify.NotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.word.block.puzzle.free.relax.helper.ACTION_ALARM_RECEIVER" />
+                <action android:name="com.word.block.puzzle.free.relax.helper.ACTION_CLICK_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".fcm.FCMReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.word.block.puzzle.free.relax.helper.fcm.ACTION_CLICK_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".fcm.FCMService"
+            android:directBootAware="true"
+            android:exported="false">
+            <intent-filter android:priority="500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MiniCrossWord</string>
+    <string name="notify_title_1">Coffee and Crosswords!☕️</string>
+    <string name="notify_title_2">Brainy Breakfast!🍞</string>
+    <string name="notify_title_3">Rise and Shine!☀️</string>
+    <string name="notify_title_4">Wake up Winner!🏆</string>
+    <string name="notify_title_5">Morning Boost!🌞</string>
+    <string name="notify_title_6">Mindful Mornings.🌹</string>
+    <string name="notify_title_7">Crossword Cravings!🌼</string>
+    <string name="notify_title_8">Afternoon Pick-Me-Up!🌻</string>
+    <string name="notify_title_9">Afternoon Adventures!🚀</string>
+    <string name="notify_title_10">Brain Workout!😉</string>
+    <string name="notify_title_11">Midday Mystery!💥</string>
+    <string name="notify_title_12">Midday Mindbender!🌤</string>
+    <string name="notify_title_13">Afternoon Agility!🔥</string>
+    <string name="notify_title_14">Lunchtime Logic!⚡️</string>
+    <string name="notify_title_15">Unwind and Solve!☘️</string>
+    <string name="notify_title_16">Evening Brain Gain!🏆</string>
+    <string name="notify_title_17">Starry Crossword!🌟</string>
+    <string name="notify_title_18">Dreamy Dilemmas!🥰</string>
+    <string name="notify_title_19">Moonlight Mysteries!🌙</string>
+    <string name="notify_title_20">Goodnight, Brain!🎧</string>
+    <string name="notify_title_21">Sweet Dream Puzzles!🍯</string>
+    <string name="notify_content_1">Perfect companions for a lovely morning!</string>
+    <string name="notify_content_2">Fuel your mind with a game of Mini Crossword!🍪</string>
+    <string name="notify_content_3">Wake your brain up with a quick round of Mini Crossword!🌸</string>
+    <string name="notify_content_4">Start your day on a winning note with Mini Crossword!🥇</string>
+    <string name="notify_content_5">Unleash your intellect with today\'s Mini Crossword puzzle!🧀</string>
+    <string name="notify_content_6">What better way to start your day than Mini Crossword?</string>
+    <string name="notify_content_7">Satisfy your morning crossword cravings now!🌇</string>
+    <string name="notify_content_8">Bored? Energize your afternoon with Mini Crossword!😊</string>
+    <string name="notify_content_9">Embark on an intellectual journey with Mini Crossword!🏇</string>
+    <string name="notify_content_10">Get neurons firing with an engaging crossword puzzle!</string>
+    <string name="notify_content_11">Solve intriguing puzzles in Mini Crossword!🎃</string>
+    <string name="notify_content_12">Try your hand at our challenging Mini Crossword!</string>
+    <string name="notify_content_13">Boost your mental agility with a quick game!🧠</string>
+    <string name="notify_content_14">Test your logic and vocabulary with Mini Crossword!💯</string>
+    <string name="notify_content_15">Relax and test your skills with our Mini Crossword!🏖</string>
+    <string name="notify_content_16">Boost your knowledge this evening with our crossword!👏</string>
+    <string name="notify_content_17">Guess words under the stars with Mini Crossword!✨</string>
+    <string name="notify_content_18">Solve dreamy dilemmas in our nighttime crossword!💤</string>
+    <string name="notify_content_19">Solve Mini Crossword puzzles under the moonlight!🌃</string>
+    <string name="notify_content_20">Give your brain a goodnight workout with Mini Crossword!🎆</string>
+    <string name="notify_content_21">Settle down with a cozy game of Mini Crossword before bed!🍰</string>
+</resources>
