@@ -75,8 +75,6 @@ public class NotificationUtils {
 
     public static DailyAlarmInfo formatNotificationDailyAlarmInfo(Context context, int id, int hour, int minute, String eventSuffix, boolean isNoon, boolean isNight) {
         DailyAlarmInfo info = new DailyAlarmInfo();
-        MsgInfo content = getDailyNotificationContent(context, isNoon, isNight);
-        info.msgInfo = content;
         info.level = -1;
         info.hour = hour;
         info.minute = minute;
@@ -90,11 +88,6 @@ public class NotificationUtils {
 
     public static DailyAlarmInfo formatNotificationDailyActivityAlarmInfo(Context context, int id, int hour, int minute, int infoId) {
         DailyAlarmInfo info = new DailyAlarmInfo();
-        MsgInfo content = getLocalMsgInfo(context, infoId);
-        if (content == null) {
-            Log.e(NotificationHelper.LOG_TAG, "msg info err:" + infoId);
-        }
-        info.msgInfo = content;
         info.level = -1;
         info.hour = hour;
         info.minute = minute;
@@ -121,7 +114,6 @@ public class NotificationUtils {
     }
 
     public static MsgInfo getDailyNotificationContent(Context context, boolean isNoon, boolean isNight) {
-        Random random = new Random();
         List<MsgInfo> tmp = new ArrayList<>();
 
         List<MsgInfo> infos = NotificationHelper.getInstance(context).msgInfos;

@@ -135,14 +135,14 @@ public class NotificationHelper {
     }
 
     //创建推送对象
-    public Notification buildNotification(Context context, DailyAlarmInfo info, int requestCode) {
+    public Notification buildNotification(Context context, DailyAlarmInfo info, int requestCode,MsgInfo msg) {
         Intent intent = new Intent(context, NotificationReceiver.class);
         intent.setAction(NotificationReceiver.ACTION_NOTIFY_CLICK);
         intent.putExtra(NotificationHelper.KEY_ALARM_DAILY_DATA, new Gson().toJson(info));
         intent.putExtra(NotificationHelper.EXTRA_REQUEST_CODE, requestCode);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, info.id, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
-        RemoteViews view = getDailyNotifyView(context, info.msgInfo.title, info.msgInfo.content);
+        RemoteViews view = getDailyNotifyView(context, msg.title, msg.content);
         if (NotificationUtils.isTestView(context) && !NotificationUtils.isSDKBig12()) {
             if (NotificationUtils.isMorning(info.hour)) {
                 view.setImageViewResource(R.id.ic_icon, R.mipmap.push_morning);
@@ -157,8 +157,8 @@ public class NotificationHelper {
         @SuppressLint("NotificationTrampoline") NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context, "WordCrush")
                         .setSmallIcon(R.mipmap.notify_icon)
-                        .setContentTitle(info.msgInfo.title)
-                        .setContentText(info.msgInfo.content)
+                        .setContentTitle(msg.title)
+                        .setContentText(msg.content)
                         .setAutoCancel(true)
                         .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.app_icon))
                         .setDefaults(Notification.DEFAULT_LIGHTS)
@@ -184,7 +184,7 @@ public class NotificationHelper {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("WordCrush",
-                    TextUtils.isEmpty(info.msgInfo.title) ? "WordCrush" : info.msgInfo.title,
+                    TextUtils.isEmpty(msg.title) ? "WordCrush" : msg.title,
                     NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
@@ -209,8 +209,8 @@ public class NotificationHelper {
         return view;
     }
 
-    public void sendNotification(Context context, DailyAlarmInfo info, int code) {
-        Notification notification = NotificationHelper.getInstance(context).buildNotification(context, info, code);
+    public void sendNotification(Context context, DailyAlarmInfo info, int code,MsgInfo msg) {
+        Notification notification = NotificationHelper.getInstance(context).buildNotification(context, info, code,msg);
         NotificationHelper.getInstance(context).getNotificationManager(context).notify(info.id, notification);
         String suffix = "";
         int id = -1;
@@ -315,7 +315,6 @@ public class NotificationHelper {
         DailyAlarmInfo info = new DailyAlarmInfo();
         info.id = id;
         MsgInfo msg = new MsgInfo(title, content);
-        info.msgInfo = msg;
-        sendNotification(context, info, REQUEST_CODE_NOTIFICATION);
+        sendNotification(context, info, REQUEST_CODE_NOTIFICATION,msgInfos.get(0));
     }
 }

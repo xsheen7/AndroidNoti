@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+
 import com.google.gson.Gson;
 import com.word.block.puzzle.free.relax.helper.FirebaseManager;
 import com.word.block.puzzle.free.relax.helper.utils.SharedPreferencesUtils;
@@ -32,14 +33,14 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         //收到每日消息埋点
         String suffix = info.eventSuffix;
-        if(!Objects.isNull(suffix) && !suffix.isEmpty()){
+        if (!Objects.isNull(suffix) && !suffix.isEmpty()) {
             int id = info.id;
             FirebaseManager.getInstance(context).logDailyNotificationEvent(FirebaseManager.EVENT_RECEIVE_DAILY_NOTIFICATION, suffix, id);
         }
 
-        Log.i(NotificationHelper.LOG_TAG,"receive :" + info.id);
+        Log.i(NotificationHelper.LOG_TAG, "receive :" + info.id);
 
-        if(info.isActivity){
+        if (info.isActivity) {
 
         }
 
@@ -62,8 +63,8 @@ public class NotificationReceiver extends BroadcastReceiver {
         int code = intent.getIntExtra(NotificationHelper.EXTRA_REQUEST_CODE, 0);
         String json = intent.getStringExtra(NotificationHelper.KEY_ALARM_DAILY_DATA);
         DailyAlarmInfo info = new Gson().fromJson(json, DailyAlarmInfo.class);
-        if (info == null || info.msgInfo == null){
-            Log.e(NotificationHelper.LOG_TAG,"info err");
+        if (info == null) {
+            Log.e(NotificationHelper.LOG_TAG, "info err");
             return;
         }
 
@@ -75,41 +76,18 @@ public class NotificationReceiver extends BroadcastReceiver {
         }
 
         //先判断活动
-        if(info.isActivity){
-            Log.i(NotificationHelper.LOG_TAG,"activity noti");
+        if (info.isActivity) {
+            Log.i(NotificationHelper.LOG_TAG, "activity noti");
             //再次设置活动闹钟
-            setActivityAlarm(context,intent);
+            setActivityAlarm(context, intent);
 
-            Log.i(NotificationHelper.LOG_TAG,"check activity push:"+info.id);
-        }
-        else {
+            Log.i(NotificationHelper.LOG_TAG, "check activity push:" + info.id);
+        } else {
             //本地时间段已将推送过了
             boolean canPush = !NotificationHelper.getInstance(context).checkHasPushed(key);
 
             if (!canPush)
                 return;
-
-            if (!info.isNoon && !info.isNight) {
-                if (SharedPreferencesUtils.getInstance(context).get("only_20", "").equals("1")) {
-                    Log.e(NotificationHelper.LOG_TAG, "only_20");
-                    return;
-                }
-
-                if (SharedPreferencesUtils.getInstance(context).get("only_12_and_20", "").equals("1")) {
-                    Log.e(NotificationHelper.LOG_TAG, "only_12_and_20");
-                    return;
-                }
-
-                if (NotificationUtils.isRushRewardShowed(context)) {
-                    Log.e(NotificationHelper.LOG_TAG, "rush showed");
-                    return;
-                }
-            } else if (info.isNoon) {
-                if (SharedPreferencesUtils.getInstance(context).get("only_20", "").equals("1")) {
-                    Log.e(NotificationHelper.LOG_TAG, "only_20");
-                    return;
-                }
-            }
 
             startAlarm(context, intent);
         }
@@ -117,17 +95,19 @@ public class NotificationReceiver extends BroadcastReceiver {
         if (code == NotificationHelper.REQUEST_CODE_NOTIFICATION) {
 
             //测试推送清除推送
-            if(NotificationUtils.isTestClearPush(context)){
+            if (NotificationUtils.isTestClearPush(context)) {
 //            int notificationId = 1;
                 NotificationManager notificationManager = NotificationHelper.getInstance(context).getNotificationManager(context);
                 notificationManager.cancelAll();
             }
 
+            MsgInfo msg = NotificationUtils.getDailyNotificationContent(context, info.isNoon, info.isNight);
+
             //推送通知
-            NotificationHelper.getInstance(context).sendNotification(context, info, code);
+            NotificationHelper.getInstance(context).sendNotification(context, info, code, msg);
             Log.i(NotificationHelper.LOG_TAG, "local noti push=" + info.hour);
 
-            if(!info.isActivity){
+            if (!info.isActivity) {
                 String date = Utils.formatDate(new Date());
                 NotificationHelper.getInstance(context).setPushed(key, date);
             }
@@ -143,7 +123,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         int code = intent.getIntExtra(NotificationHelper.EXTRA_REQUEST_CODE, 0);
         String json = intent.getStringExtra(NotificationHelper.KEY_ALARM_DAILY_DATA);
         DailyAlarmInfo info = new Gson().fromJson(json, DailyAlarmInfo.class);
-        if (info.msgInfo == null) return;
+        if (info == null) return;
         if (code != NotificationHelper.REQUEST_CODE_NOTIFICATION) return;
 
         String suffix = "";
@@ -153,10 +133,9 @@ public class NotificationReceiver extends BroadcastReceiver {
             id = info.id;
         }
 
-        if(info.isActivity){
+        if (info.isActivity) {
 
-        }
-        else {
+        } else {
             FirebaseManager.getInstance(context).logDailyNotificationEvent(FirebaseManager.EVENT_CLICK_DAILY_NOTIFICATION, suffix, id);
             //first click
             String todayOpenDate = SharedPreferencesUtils.getInstance(context).get(NotificationHelper.KEY_GAME_TODAY_FIRST_OPEN_DATE_KEY, "");
@@ -185,7 +164,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
 
     //再次设置活动闹钟
-    private void setActivityAlarm(Context context, Intent intent){
+    private void setActivityAlarm(Context context, Intent intent) {
         if (!NotificationHelper.getInstance(context).isInitialized()) {
             NotificationHelper.getInstance(context).init(context);
         }
