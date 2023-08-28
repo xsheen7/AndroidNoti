@@ -1,6 +1,7 @@
 package com.word.block.puzzle.free.relax.helper.notify;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -8,14 +9,19 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.word.block.puzzle.free.relax.helper.FirebaseManager;
@@ -316,5 +322,44 @@ public class NotificationHelper {
         info.id = id;
         MsgInfo msg = new MsgInfo(title, content);
         sendNotification(context, info, REQUEST_CODE_NOTIFICATION,msgInfos.get(0));
+    }
+
+    //安卓13权限申请
+    public static final String POST_NOTIFICATIONS="android.permission.POST_NOTIFICATIONS";
+    public static void requestNotificationPermission(Activity activity) {
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ActivityCompat.checkSelfPermission(activity, POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale( activity, POST_NOTIFICATIONS)) {
+                    enableNotification(activity);
+                }else{
+                    ActivityCompat.requestPermissions( activity,new String[]{POST_NOTIFICATIONS},100);
+                }
+            }
+        } else {
+            boolean enabled = NotificationManagerCompat.from(activity).areNotificationsEnabled();
+            if (!enabled) {
+                enableNotification(activity);
+            }
+        }
+    }
+
+    private static void enableNotification(Context context) {
+        try {
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE,context. getPackageName());
+            intent.putExtra(Settings.EXTRA_CHANNEL_ID, context.getApplicationInfo().uid);
+            intent.putExtra("app_package", context.getPackageName());
+            intent.putExtra("app_uid", context.getApplicationInfo().uid);
+            context.  startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Intent intent = new Intent();
+            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package",context. getPackageName(), null);
+            intent.setData(uri);
+            context. startActivity(intent);
+        }
     }
 }
