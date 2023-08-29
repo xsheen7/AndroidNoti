@@ -352,14 +352,14 @@ public class NotificationHelper {
             intent.putExtra(Settings.EXTRA_CHANNEL_ID, context.getApplicationInfo().uid);
             intent.putExtra("app_package", context.getPackageName());
             intent.putExtra("app_uid", context.getApplicationInfo().uid);
-            context.  startActivity(intent);
+            context.startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             Uri uri = Uri.fromParts("package",context. getPackageName(), null);
             intent.setData(uri);
-            context. startActivity(intent);
+            context.startActivity(intent);
         }
     }
 }
