@@ -22,6 +22,8 @@
     <string name="notify_title_19">Moonlight Mysteries!🌙</string>
     <string name="notify_title_20">Goodnight, Brain!🎧</string>
     <string name="notify_title_21">Sweet Dream Puzzles!🍯</string>
+    <string name="notify_title_22">Halloween Treats!🎃</string>
+
     <string name="notify_content_1">Perfect companions for a lovely morning!</string>
     <string name="notify_content_2">Fuel your mind with a game of Mini Crossword!🍪</string>
     <string name="notify_content_3">Wake your brain up with a quick round of Mini Crossword!🌸</string>
@@ -43,4 +45,5 @@
     <string name="notify_content_19">Solve Mini Crossword puzzles under the moonlight!🌃</string>
     <string name="notify_content_20">Give your brain a goodnight workout with Mini Crossword!🎆</string>
     <string name="notify_content_21">Settle down with a cozy game of Mini Crossword before bed!🍰</string>
+    <string name="notify_content_22">Only 3 hours left to grab the Halloween themes!👻</string>
 </resources>

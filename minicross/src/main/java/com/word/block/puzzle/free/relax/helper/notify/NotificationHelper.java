@@ -1,5 +1,7 @@
 package com.word.block.puzzle.free.relax.helper.notify;
 
+import static com.word.block.puzzle.free.relax.helper.notify.NotificationUtils.getAppVersionCode;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -13,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -27,6 +30,8 @@ import com.google.gson.Gson;
 import com.word.block.puzzle.free.relax.helper.FirebaseManager;
 import com.word.block.puzzle.free.relax.helper.NativeHelper;
 import com.word.block.puzzle.free.relax.helper.R;
+import com.word.block.puzzle.free.relax.helper.fcm.FCMReceiver;
+import com.word.block.puzzle.free.relax.helper.fcm.FCMService;
 import com.word.block.puzzle.free.relax.helper.utils.SharedPreferencesUtils;
 import com.word.block.puzzle.free.relax.helper.utils.Utils;
 
@@ -36,6 +41,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -75,6 +81,7 @@ public class NotificationHelper {
     private static NotificationHelper notiHelper;
     private AlarmManager manager;
     public List<MsgInfo> msgInfos;
+    public List<MsgInfo> msgInfosNotDaily;
     private NotificationManager mNotiMgr;
     private Context context;
 
@@ -142,11 +149,27 @@ public class NotificationHelper {
 
     //创建推送对象
     public Notification buildNotification(Context context, DailyAlarmInfo info, int requestCode,MsgInfo msg) {
-        Intent intent = new Intent(context, NotificationReceiver.class);
+
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        } else {
+            intent = new Intent(context, NotificationReceiver.class);
+        }
+
         intent.setAction(NotificationReceiver.ACTION_NOTIFY_CLICK);
         intent.putExtra(NotificationHelper.KEY_ALARM_DAILY_DATA, new Gson().toJson(info));
         intent.putExtra(NotificationHelper.EXTRA_REQUEST_CODE, requestCode);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, info.id, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            pendingIntent = PendingIntent.getActivity(context, info.id, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
+        }
+        else
+        {
+            pendingIntent = PendingIntent.getBroadcast(context, info.id, intent, PendingIntent.FLAG_ONE_SHOT);
+        }
 
         RemoteViews view = getDailyNotifyView(context, msg.title, msg.content);
         if (NotificationUtils.isTestView(context) && !NotificationUtils.isSDKBig12()) {
@@ -258,6 +281,9 @@ public class NotificationHelper {
         msgInfos.add(new MsgInfo(19, context.getResources().getString(R.string.notify_title_19), context.getResources().getString(R.string.notify_content_19), false, true));
         msgInfos.add(new MsgInfo(20, context.getResources().getString(R.string.notify_title_20), context.getResources().getString(R.string.notify_content_20), false, true));
         msgInfos.add(new MsgInfo(21, context.getResources().getString(R.string.notify_title_21), context.getResources().getString(R.string.notify_content_21), false, true));
+
+        msgInfosNotDaily = new ArrayList<>();
+        msgInfosNotDaily.add(new MsgInfo(22, context.getResources().getString(R.string.notify_title_22), context.getResources().getString(R.string.notify_content_22), false, false));
     }
 
     //for unity
@@ -274,6 +300,49 @@ public class NotificationHelper {
         setAlarm(info, REQUEST_CODE_NOTIFICATION, true);
         NotificationUtils.addDailyAlarmInfoToCache(context, info);
         Log.i(LOG_TAG, "set activity alarm" + id);
+    }
+
+    //设置指定时间
+    public void setNotificationAlarm(int id,int month,int day, int hour, int minute, int infoId) {
+        DailyAlarmInfo info = new DailyAlarmInfo();
+        info.level = -1;
+        info.day = day;
+        info.hour = hour;
+        info.minute = minute;
+        info.id = id;
+        info.version = getAppVersionCode(context);
+        info.isActivity = true;
+        info.once = true;
+        info.msgId = infoId;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH,Calendar.DECEMBER);
+        calendar.set(Calendar.DAY_OF_MONTH,day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        long alarmTime = calendar.getTimeInMillis();
+
+        Intent intent = new Intent(context, NotificationReceiver.class);
+        intent.setAction(NotificationReceiver.ACTION_ALARM_RECEIVER);
+        intent.putExtra(NotificationHelper.EXTRA_REQUEST_CODE, REQUEST_CODE_NOTIFICATION);
+        intent.putExtra(KEY_ALARM_DAILY_DATA, new Gson().toJson(info));
+        intent.putExtra(KEY_ALARM_IS_EVERYDAY, false);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, info.id, intent, PendingIntent.FLAG_IMMUTABLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {// 6.0及以上
+            manager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    alarmTime,
+                    pendingIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {// 4.4及以上
+            manager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    alarmTime,
+                    pendingIntent);
+        } else {
+            manager.set(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+        }
+
+        Log.i(LOG_TAG, "set alarm" + id+" month="+month + " day="+day +" hour="+hour +" timemilsec="+alarmTime);
     }
 
     //每日打开的日期
@@ -360,6 +429,68 @@ public class NotificationHelper {
             Uri uri = Uri.fromParts("package",context. getPackageName(), null);
             intent.setData(uri);
             context.startActivity(intent);
+        }
+    }
+
+    private static ArrayList<Integer> alarmIds = new ArrayList<>();
+    private static ArrayList<String> fcmPeriods = new ArrayList<>();
+
+    /**
+     * 12以上 处理推送点击
+     */
+    public static void handlerAppLaunch(Context context) {
+        Log.i(LOG_TAG,"handle activity noti");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (context instanceof Activity) {
+                Intent intent = ((Activity) context).getIntent();
+
+                Log.i(LOG_TAG,"handle activity noti action="+intent.getAction());
+
+                Bundle bundle = intent.getExtras();
+                if (bundle != null && bundle.size() > 0) {
+                    if (NotificationReceiver.ACTION_NOTIFY_CLICK.equals(intent.getAction())) {
+
+                        String json = intent.getStringExtra(NotificationHelper.KEY_ALARM_DAILY_DATA);
+                        DailyAlarmInfo info = new Gson().fromJson(json, DailyAlarmInfo.class);
+
+                        if(info!=null){
+
+                            if(alarmIds.contains(info.id))
+                                return;
+
+                            alarmIds.add(info.id);
+                            intent.setClass(context, NotificationReceiver.class);
+                            intent.putExtra(NotificationHelper.EXTRA_REQUEST_CODE, REQUEST_CODE_NOTIFICATION);
+                            intent.setAction(NotificationReceiver.ACTION_NOTIFY_CLICK);
+                            intent.putExtra(NotificationHelper.KEY_ALARM_DAILY_DATA, new Gson().toJson(info));
+                            context.sendBroadcast(intent);
+
+                            Log.i(LOG_TAG,"local activity broadcast");
+                        }
+                    }
+                    else if(FCMReceiver.ACTION_NOTIFY_CLICK.equals(intent.getAction())){
+
+                        String period = intent.getStringExtra(FCMService.EXTRA_PERIOD_CODE);
+
+                        if(fcmPeriods.contains(period))
+                            return;
+                        fcmPeriods.add(period);
+
+                        int msgId = intent.getIntExtra(FCMService.PUSH_INFO_ID,-1);
+
+                        intent.setClass(context, FCMReceiver.class);
+                        intent.setAction(FCMReceiver.ACTION_NOTIFY_CLICK);
+                        intent.putExtra(EXTRA_REQUEST_CODE, FCMService.FCM_REQUEST_CODE);
+                        intent.putExtra(FCMService.PUSH_INFO_ID,msgId);
+                        intent.putExtra(FCMService.EXTRA_PERIOD_CODE, period);
+
+                        context.sendBroadcast(intent);
+
+                        Log.i(LOG_TAG,"fcm activity broadcast");
+                    }
+                }
+            }
         }
     }
 }

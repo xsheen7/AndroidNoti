@@ -75,21 +75,23 @@ public class NotificationReceiver extends BroadcastReceiver {
             key = NotificationHelper.KEY_LOCALE_E_NOTI_FINISH;
         }
 
-        //先判断活动
-        if (info.isActivity) {
-            Log.i(NotificationHelper.LOG_TAG, "activity noti");
-            //再次设置活动闹钟
-            setActivityAlarm(context, intent);
+        if(!info.once){
+            //先判断活动
+            if (info.isActivity) {
+                Log.i(NotificationHelper.LOG_TAG, "activity noti");
+                //再次设置活动闹钟
+                setActivityAlarm(context, intent);
 
-            Log.i(NotificationHelper.LOG_TAG, "check activity push:" + info.id);
-        } else {
-            //本地时间段已将推送过了
-            boolean canPush = !NotificationHelper.getInstance(context).checkHasPushed(key);
+                Log.i(NotificationHelper.LOG_TAG, "check activity push:" + info.id);
+            } else {
+                //本地时间段已将推送过了
+                boolean canPush = !NotificationHelper.getInstance(context).checkHasPushed(key);
 
-            if (!canPush)
-                return;
+                if (!canPush)
+                    return;
 
-            startAlarm(context, intent);
+                startAlarm(context, intent);
+            }
         }
 
         if (code == NotificationHelper.REQUEST_CODE_NOTIFICATION) {
@@ -101,11 +103,17 @@ public class NotificationReceiver extends BroadcastReceiver {
                 notificationManager.cancelAll();
             }
 
-            MsgInfo msg = NotificationUtils.getDailyNotificationContent(context, info.isNoon, info.isNight);
+            MsgInfo msg = null;
+            if(info.msgId > 0){
+                msg = NotificationUtils.getLocalMsgInfo(context, info.msgId);
+            }
+            else {
+                msg = NotificationUtils.getDailyNotificationContent(context, info.isNoon, info.isNight);
+            }
 
             //推送通知
             NotificationHelper.getInstance(context).sendNotification(context, info, code, msg);
-            Log.i(NotificationHelper.LOG_TAG, "local noti push=" + info.hour);
+            Log.i(NotificationHelper.LOG_TAG, "local noti push=" + info.hour+"msg:"+msg.id);
 
             if (!info.isActivity) {
                 String date = Utils.formatDate(new Date());
@@ -146,6 +154,8 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         Intent launch = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         context.startActivity(launch);
+
+        Log.i(NotificationHelper.LOG_TAG, "local noti click finish");
     }
 
     //本地收到通知后，再次设置闹钟

@@ -12,7 +12,7 @@ import com.word.block.puzzle.free.relax.helper.notify.NotificationUtils;
 import com.word.block.puzzle.free.relax.helper.utils.SharedPreferencesUtils;
 
 public class FCMReceiver extends BroadcastReceiver {
-    public static final String ACTION_NOTIFY_CLICK = ".fcm.ACTION_CLICK_NOTIFICATION";
+    public static final String ACTION_NOTIFY_CLICK = "com.word.block.puzzle.free.relax.helper.fcm.ACTION_CLICK_NOTIFICATION";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -24,8 +24,7 @@ public class FCMReceiver extends BroadcastReceiver {
         if(!NotificationHelper.getInstance(context).isFCMOpen(context))
             return;
 
-        if ((context.getPackageName() + ACTION_NOTIFY_CLICK).equals(intent.getAction())) {
-
+        if (ACTION_NOTIFY_CLICK.equals(intent.getAction())) {
             handleClickNotify(context,intent);
         }
     }

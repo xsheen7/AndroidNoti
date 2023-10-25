@@ -175,12 +175,29 @@ public class FCMService extends FirebaseMessagingService {
     }
 
     private Notification buildNotification(Context context, int id, String title, String content, int period) {
-        Intent intent = new Intent(context, FCMReceiver.class);
-        intent.setAction(context.getPackageName() + FCMReceiver.ACTION_NOTIFY_CLICK);
+
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        } else {
+            intent = new Intent(context, FCMReceiver.class);
+        }
+
+        intent.setAction(FCMReceiver.ACTION_NOTIFY_CLICK);
+
         intent.putExtra(PUSH_INFO_ID,id);
         intent.putExtra(EXTRA_REQUEST_CODE, FCM_REQUEST_CODE);
         intent.putExtra(EXTRA_PERIOD_CODE, Integer.toString(period));
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, FCM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        {
+            pendingIntent = PendingIntent.getActivity(context, FCM_REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT);
+        }
+        else
+        {
+            pendingIntent = PendingIntent.getBroadcast(context, FCM_REQUEST_CODE, intent, PendingIntent.FLAG_ONE_SHOT);
+        }
 
         RemoteViews view = NotificationHelper.getInstance(context).getDailyNotifyView(context, title, content);
         if(NotificationUtils.isTestView(context) && !NotificationUtils.isSDKBig12()){

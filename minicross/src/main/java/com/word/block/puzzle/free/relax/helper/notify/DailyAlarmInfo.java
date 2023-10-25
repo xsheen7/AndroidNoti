@@ -3,6 +3,7 @@ package com.word.block.puzzle.free.relax.helper.notify;
 public class DailyAlarmInfo {
     public int id;
     public int level;//等级
+    public int day;//天
     public int hour;//定时，小时
     public int minute;//定时，分钟
     public String eventSuffix;//后缀
@@ -10,4 +11,6 @@ public class DailyAlarmInfo {
     public boolean isNoon;
     public boolean isNight;
     public boolean isActivity;
+    public int msgId;
+    public boolean once;
 }

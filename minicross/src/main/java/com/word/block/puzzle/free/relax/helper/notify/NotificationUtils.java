@@ -156,11 +156,12 @@ public class NotificationUtils {
         return tmp.get(index);
     }
 
+    //指定 id 的 msg
     public static MsgInfo getLocalMsgInfo(Context context, int id) {
-        List<MsgInfo> infos = NotificationHelper.getInstance(context).msgInfos;
+        List<MsgInfo> infos = NotificationHelper.getInstance(context).msgInfosNotDaily;
         if (infos == null) {
             NotificationHelper.getInstance(context).initMsg(context);
-            infos = NotificationHelper.getInstance(context).msgInfos;
+            infos = NotificationHelper.getInstance(context).msgInfosNotDaily;
         }
 
         for (MsgInfo info : infos) {
